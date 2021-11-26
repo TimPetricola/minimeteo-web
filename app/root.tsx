@@ -112,14 +112,9 @@ function Document({
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <header>
-        <div>
-          <Link to="/">Minimeteo</Link>
-        </div>
-      </header>
-      <div>
-        <div>{children}</div>
+    <div className="antialiased text-gray-900 px-6">
+      <div className="max-w-xl mx-auto py-12 divide-y md:max-w-4xl">
+        {children}
       </div>
     </div>
   );

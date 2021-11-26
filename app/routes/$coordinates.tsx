@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import type { MetaFunction, LoaderFunction } from "remix";
-import { useLoaderData, json, Link } from "remix";
+import { MetaFunction, LoaderFunction, Link, redirect } from "remix";
+import { useLoaderData, json } from "remix";
 import { fetchForecast } from "~/src/meteoFrance";
 import { ForecastResponse } from "~/src/types";
 import { isEqual, isAfter, startOfHour, isToday } from "date-fns";
@@ -9,9 +9,13 @@ import { format, utcToZonedTime } from "date-fns-tz";
 export const loader: LoaderFunction = async ({ params }) => {
   const [latitude, longitude] = (params.coordinates ?? "").split(",");
 
-  const forecast = await fetchForecast(latitude, longitude);
+  try {
+    const forecast = await fetchForecast(latitude, longitude);
 
-  return json(forecast);
+    return json(forecast);
+  } catch (e) {
+    return redirect("/");
+  }
 };
 
 export const meta: MetaFunction = ({ data }) => {
@@ -44,78 +48,96 @@ export default function Forecast() {
   );
 
   return (
-    <div>
-      <h1>{forecast.position.name}</h1>
-      <div>
-        <h2>Now</h2>
-        <div>
-          <div>{Math.round(currentForecast.temperature)}°</div>
+    <>
+      <header className="py-8">
+        <h1 className="text-4xl font-bold mb-4">
+          <Link to="/" title="Back" className="text-gray-300">
+            ←
+          </Link>{" "}
+          {forecast.position.name}
+        </h1>
+        <div className="flex  items-center">
+          <div className="flex-none mr-4">
+            <img
+              height={120}
+              width={120}
+              src={`/icons/${currentForecast.iconId}.svg`}
+            />
+          </div>
           <div>
-            Feels like {Math.round(currentForecast.perceivedTemperature)}°
+            <div className="text-2xl font-bold text-gray-600">
+              {Math.round(currentForecast.temperature)}°
+            </div>
+            <div className="text-lg text-gray-600">
+              Feels like {Math.round(currentForecast.perceivedTemperature)}°
+            </div>
           </div>
         </div>
-        <div>
-          <img
-            height={120}
-            width={120}
-            src={`/icons/${currentForecast.iconId}.svg`}
-          />
-        </div>
-      </div>
-      <div>
-        <h2>Hourly</h2>
-        {upcomingHourly.map((hourly) => (
-          <div key={new Date(hourly.datetime).toISOString()}>
-            <div>
-              {format(
-                utcToZonedTime(
-                  new Date(hourly.datetime),
-                  forecast.position.timeZone
-                ),
-                "HH'h'",
-                {
-                  timeZone: forecast.position.timeZone,
-                }
-              )}
-            </div>
-            <div>
-              <img height={50} width={50} src={`/icons/${hourly.iconId}.svg`} />
-            </div>
-            <div>{Math.round(hourly.temperature)}°</div>
-          </div>
-        ))}
-      </div>
-
-      <div>
-        <h2>Daily</h2>
-        {forecast.daily.map((daily) => {
-          const zonedDateTime = utcToZonedTime(
-            new Date(daily.datetime),
-            forecast.position.timeZone
-          );
-          const title = isToday(zonedDateTime)
-            ? "Today"
-            : format(zonedDateTime, "E ", {
-                timeZone: forecast.position.timeZone,
-              });
-
-          const subtitle = format(zonedDateTime, "MMM d", {
-            timeZone: forecast.position.timeZone,
-          });
-
-          return (
-            <div key={new Date(daily.datetime).toISOString()}>
+      </header>
+      <main>
+        <section className="py-12">
+          <h2 className="text-2xl font-bold">Hourly</h2>
+          {upcomingHourly.map((hourly) => (
+            <div key={new Date(hourly.datetime).toISOString()}>
               <div>
-                <div>{title}</div>
-                <div>{subtitle}</div>
+                {format(
+                  utcToZonedTime(
+                    new Date(hourly.datetime),
+                    forecast.position.timeZone
+                  ),
+                  "HH'h'",
+                  {
+                    timeZone: forecast.position.timeZone,
+                  }
+                )}
               </div>
-              <img height={50} width={50} src={`/icons/${daily.iconId}.svg`} />
-              <div>{Math.round(daily.temperature.min)}°</div>
-              <div>{Math.round(daily.temperature.max)}°</div>
+              <div>
+                <img
+                  height={50}
+                  width={50}
+                  src={`/icons/${hourly.iconId}.svg`}
+                />
+              </div>
+              <div>{Math.round(hourly.temperature)}°</div>
             </div>
-          );
-        })}
-      </div>
-    </div>
+          ))}
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-bold">Daily</h2>
+          {forecast.daily.map((daily) => {
+            const zonedDateTime = utcToZonedTime(
+              new Date(daily.datetime),
+              forecast.position.timeZone
+            );
+            const title = isToday(zonedDateTime)
+              ? "Today"
+              : format(zonedDateTime, "E ", {
+                  timeZone: forecast.position.timeZone,
+                });
+
+            const subtitle = format(zonedDateTime, "MMM d", {
+              timeZone: forecast.position.timeZone,
+            });
+
+            return (
+              <div key={new Date(daily.datetime).toISOString()}>
+                <div>
+                  <div>{title}</div>
+                  <div>{subtitle}</div>
+                </div>
+                <img
+                  height={50}
+                  width={50}
+                  src={`/icons/${daily.iconId}.svg`}
+                />
+                <div>{Math.round(daily.temperature.min)}°</div>
+                <div>{Math.round(daily.temperature.max)}°</div>
+              </div>
+            );
+          })}
+        </section>
+      </main>
+    </>
   );
 }
