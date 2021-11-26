@@ -67,35 +67,30 @@ export default function Index() {
     <>
       <header className="py-8">
         <h1 className="text-4xl font-bold">
-          <Link to="/">Minimeteo</Link>
+          <Link to="/">🌤 Minimeteo</Link>
         </h1>
       </header>
-      <main>
-        <section className="py-12">
-          <Form method="post">
-            <label className="block">
-              <span className="text-gray-700">Search for a place</span>
-              <input
-                name="query"
-                type="search"
-                className="mt-1 block w-full"
-                placeholder=""
-              />
-            </label>
-          </Form>
-        </section>
+      <main className="py-12 space-y-8">
+        <Form method="post">
+          <label className="block">
+            <span className="text-gray-700">Search for a place</span>
+            <input
+              name="query"
+              type="search"
+              className="mt-1 block w-full"
+              placeholder=""
+            />
+          </label>
+        </Form>
 
         {recentPlaces.length > 0 && (
-          <section className="py-12">
-            <h2 className="text-2xl font-bold mb-4">Recent places</h2>
-            <ul>
-              {recentPlaces.map((place, index) => (
-                <li key={place.name} className={`opacity-${100 - index * 10}`}>
-                  <Link to={`/${place.lat},${place.lon}`}>{place.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </section>
+          <ul>
+            {recentPlaces.map((place, index) => (
+              <li key={place.name} className={`opacity-${100 - index * 10}`}>
+                <Link to={`/${place.lat},${place.lon}`}>{place.name}</Link>
+              </li>
+            ))}
+          </ul>
         )}
       </main>
     </>
