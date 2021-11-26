@@ -5,6 +5,7 @@ import { fetchForecast } from "~/src/meteoFrance";
 import { ForecastResponse } from "~/src/types";
 import { isEqual, isAfter, startOfHour, isToday } from "date-fns";
 import { format, utcToZonedTime } from "date-fns-tz";
+
 export const loader: LoaderFunction = async ({ params }) => {
   const [latitude, longitude] = (params.coordinates ?? "").split(",");
 
@@ -57,7 +58,7 @@ export default function Forecast() {
           <img
             height={120}
             width={120}
-            src={`https://meteo-api.vercel.app/api/icons/${currentForecast.iconId}.svg`}
+            src={`/icons/${currentForecast.iconId}.svg`}
           />
         </div>
       </div>
@@ -78,11 +79,7 @@ export default function Forecast() {
               )}
             </div>
             <div>
-              <img
-                height={50}
-                width={50}
-                src={`https://meteo-api.vercel.app/api/icons/${hourly.iconId}.svg`}
-              />
+              <img height={50} width={50} src={`/icons/${hourly.iconId}.svg`} />
             </div>
             <div>{Math.round(hourly.temperature)}°</div>
           </div>
@@ -112,11 +109,7 @@ export default function Forecast() {
                 <div>{title}</div>
                 <div>{subtitle}</div>
               </div>
-              <img
-                height={50}
-                width={50}
-                src={`https://meteo-api.vercel.app/api/icons/${daily.iconId}.svg`}
-              />
+              <img height={50} width={50} src={`/icons/${daily.iconId}.svg`} />
               <div>{Math.round(daily.temperature.min)}°</div>
               <div>{Math.round(daily.temperature.max)}°</div>
             </div>
