@@ -7,6 +7,7 @@ import {
   Form,
   Link,
   useLoaderData,
+  useTransition,
 } from "remix";
 import { searchPlaces } from "~/src/meteoFrance";
 import { getRecentPlaces, setRecentPlaces } from "~/src/cookies";
@@ -62,25 +63,51 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const { recentPlaces } = useLoaderData<LoaderData>();
+  const transition = useTransition();
 
   return (
     <>
       <header className="py-8">
         <h1 className="text-4xl font-bold">
-          <Link to="/">🌤 Minimeteo</Link>
+          {transition.submission === undefined ? (
+            <Link to="/">🌤 Minimeteo</Link>
+          ) : (
+            <>
+              <Link to="/" title="Back" className="text-gray-300">
+                ←
+              </Link>{" "}
+              {transition.submission.formData.get("query")}
+            </>
+          )}
         </h1>
       </header>
       <main className="py-12 space-y-8">
         <Form method="post">
-          <label className="block">
+          <label className="block mb-1" htmlFor="query">
             <span className="text-gray-700">Search for a place</span>
+          </label>
+
+          <div className="flex">
             <input
+              id="query"
               name="query"
               type="search"
-              className="mt-1 block w-full"
+              className="flex-1 bg-red"
               placeholder=""
             />
-          </label>
+
+            <button
+              title="Search"
+              disabled={transition.submission !== undefined}
+              className="text-lg leading-6 px-4 py-2 "
+            >
+              {transition.submission === undefined ? (
+                "🔎"
+              ) : (
+                <span className="w-4 h-4 border-2 border-gray-700 rounded-full inline-block spinner" />
+              )}
+            </button>
+          </div>
         </Form>
 
         {recentPlaces.length > 0 && (
