@@ -8,10 +8,12 @@ import {
   Link,
   useLoaderData,
   useTransition,
+  useNavigate,
 } from "remix";
 import { searchPlaces } from "~/src/meteoFrance";
 import { getRecentPlaces, setRecentPlaces } from "~/src/cookies";
 import { Place } from "~/src/types";
+import { useEffect, useState } from "react";
 
 type LoaderData = { recentPlaces: Place[] };
 
@@ -64,6 +66,23 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const { recentPlaces } = useLoaderData<LoaderData>();
   const transition = useTransition();
+  const navigate = useNavigate();
+  const [canGeolocate, setCanGeolocate] = useState(false);
+
+  useEffect(() => {
+    setCanGeolocate(navigator?.geolocation?.getCurrentPosition !== undefined);
+  }, []);
+
+  const onGeolocate = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        navigate(`/${position.coords.latitude},${position.coords.longitude}`);
+      },
+      () => {
+        setCanGeolocate(false);
+      }
+    );
+  };
 
   return (
     <>
@@ -83,8 +102,18 @@ export default function Index() {
       </header>
       <main className="py-12 space-y-8">
         <Form method="post">
-          <label className="block mb-1" htmlFor="query">
-            <span className="text-gray-700">Search for a place</span>
+          <label className="block mb-1 text-gray-700" htmlFor="query">
+            <span className="font-bold">Search for a place</span>
+            {canGeolocate && (
+              <>
+                {" "}
+                (or{" "}
+                <span className="underline" onClick={onGeolocate}>
+                  geolocate me
+                </span>
+                )
+              </>
+            )}
           </label>
 
           <div className="flex">
