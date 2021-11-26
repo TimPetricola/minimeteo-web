@@ -10,19 +10,10 @@ import {
 } from "remix";
 import type { LinksFunction } from "remix";
 
-import globalStylesUrl from "~/styles/global.css";
-import darkStylesUrl from "~/styles/dark.css";
+import stylesUrl from "~/styles/app.css";
 
-// https://remix.run/api/app#links
 export let links: LinksFunction = () => {
-  return [
-    { rel: "stylesheet", href: globalStylesUrl },
-    {
-      rel: "stylesheet",
-      href: darkStylesUrl,
-      media: "(prefers-color-scheme: dark)",
-    },
-  ];
+  return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
 // https://remix.run/api/conventions#default-export
@@ -121,14 +112,14 @@ function Document({
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="remix-app">
-      <header className="remix-app__header">
-        <div className="container remix-app__header-content">
+    <div>
+      <header>
+        <div>
           <Link to="/">Minimeteo</Link>
         </div>
       </header>
-      <div className="remix-app__main">
-        <div className="container remix-app__main-content">{children}</div>
+      <div>
+        <div>{children}</div>
       </div>
     </div>
   );
